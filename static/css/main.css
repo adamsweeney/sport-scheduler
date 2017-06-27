@@ -1,0 +1,53 @@
+body {
+  background-color: #fff;
+	color: #004276;
+}
+
+.wrapper {
+	padding: 50px 100px;
+}
+
+.form-label {
+  margin-bottom: 0px;
+  margin-top: 10px;
+}
+
+.required {
+  font-weight: bold;
+}
+
+.optional {
+  font-style: italic;
+}
+
+.rankings-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 10px;
+}
+
+.rankings-list-item {
+  margin: 5px;
+  padding: 5px;
+}
+
+.params-min {
+  height:358px;
+  overflow: scroll;
+}
+
+#generateButton {
+  display: block;
+  float: right;
+}
+
+#teamsList {
+  list-style-type: none;
+  padding-left: 5px;
+}
+
+#teamsList > li {
+  padding: 5px;
+  border-top-right-radius: 10px;
+}

@@ -1,0 +1,116 @@
+<!DOCTYPE HTML>
+<!--
+	Aerial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>{{ .Title }}</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!-- Stylesheets -->
+		<link rel="stylesheet" href="css/bootstrap.min.css" />
+		<link rel="stylesheet" href="css/jquery-ui.min.css" />
+		<link rel="stylesheet" href="css/jquery-ui.theme.min.css" />
+		<link rel="stylesheet" href="css/fullcalendar.min.css" />
+		<link rel="stylesheet" href="css/main.css" />
+		<!--[if lte IE 9]><link rel="stylesheet" href="css/ie9.css" /><![endif]-->
+    <!--
+     <link rel="icon" type="image/x-icon" href="{{ . | absURL }}">
+    -->
+	</head>
+	<body>
+
+		<div class="wrapper">
+				<div class="row">
+					<div class="col-md-10">
+						<div class="row">
+							<h4 style="margin-left:5px">Parameters</h4>
+						</div>
+					</div>
+					<div class="col-md-2">
+						<div class="row">
+							<button id="generateButton" disabled class="btn btn-md btn-primary">Generate</button>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-4">
+						<div class="row">
+							<ul class="list-group">
+								<form>
+								  <li class="list-group-item">
+										<p class="form-label required">Season Start:</p>
+										<input type="text" class="form-control" placeholder="Start Date..." id="seasonStartPicker">
+										<p class="form-label required">Season End:</p>
+										<input type="text" class="form-control" placeholder="End Date..." id="seasonEndPicker">
+									</li>
+								  <li class="list-group-item">
+										<p class="form-label required">Number of teams</p>
+										<input type="text" class="form-control" maxlength="3" id="numberOfTeams" placeholder="2-100" onkeypress='return event.charCode >= 48 && event.charCode <= 57' />
+										<p class="form-label required">Number of games</p>
+										<input type="text" class="form-control" maxlength="3" id="numberOfGames" placeholder="Preferably an even number" onkeypress='return event.charCode >= 48 && event.charCode <= 57' />
+									</li>
+								  <li class="list-group-item">
+										<p class="form-label required">Back to Back allowed?</p>
+										<input type="checkbox" checked id="backToBack"/>
+										<div id="backToBacks">
+											<p class="form-label required">Number of back to backs allowed</p>
+											<select id="backToBackNumber">
+												<option id="twoBackToBacks">2</option>
+												<option id="threeBackToBacks">3</option>
+												<option id="fourBackToBacks">4</option>
+											</select>
+										</div>
+									</li>
+								</form>
+						  </ul>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="row">
+							<ul class="list-group">
+								<li class="list-group-item params-min">
+									<p class="form-label optional" id="keyDays" title="More games will be featured on these days">Key Days of the Week</p>
+									<ul id="rankingDays" class="rankings-list">
+										<li id="sunday" class="ui-state-default rankings-list-item">Sunday</li>
+										<li id="monday" class="ui-state-default rankings-list-item">Monday</li>
+										<li id="tuesday" class="ui-state-default rankings-list-item">Tuesday</li>
+										<li id="wednesday" class="ui-state-default rankings-list-item">Wednesday</li>
+										<li id="thursday" class="ui-state-default rankings-list-item">Thursday</li>
+										<li id="friday" class="ui-state-default rankings-list-item">Friday</li>
+										<li id="saturday" class="ui-state-default rankings-list-item">Saturday</li>
+									</ul>
+								</li>
+							</ul>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="row" style="overflow:scroll">
+							<ul class="list-group">
+								<li class="list-group-item params-min">
+									<p class="form-label required">Teams</p>
+									<ul id="teamsList">
+
+									</ul>
+								</li>
+							</ul>
+						</div>
+					</div>
+			</div>
+			<div class="row">
+				<div id="calendar"></div>
+			</div>
+		</div>
+
+		<!-- Scripts -->
+		<script src="js/jquery-3.2.1.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		<script src="js/moment.min.js"></script>
+		<script src="js/jquery-ui.min.js"></script>
+		<script src="js/fullcalendar.min.js"></script>
+		<script src="js/chance.min.js"></script>
+		<script src="js/main.js"></script>
+	</body>
+</html>

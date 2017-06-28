@@ -14,10 +14,15 @@ $(document).ready(function() {
     var gamesToPlay;
 
     class Team {
-      constructor(city, color, games) {
+      constructor(city, color, games, dates) {
         this.city = city;
         this.color = color;
         this.games = games;
+        this.dates = dates;
+      }
+
+      toString(){
+        return this.city;
       }
     }
 
@@ -95,7 +100,7 @@ $(document).ready(function() {
           for (var i = 1; i <= numberOfTeams; i++) {
             var city = chance.city();
             var color = chance.color({format: 'hex'});
-            teams.push(new Team(city, color, 0));
+            teams.push(new Team(city, color, 0, []));
           }
           teams.sort(sortTeams);
           teams.forEach(function(element) {
@@ -114,14 +119,12 @@ $(document).ready(function() {
       totalGamesPerTeam = parseInt($("#numberOfGames").val());
       gamesToPlay = Math.ceil(totalGamesPerTeam / (numberOfTeams-1));
       var events = [];
-      var datesToKeep = [];
       var i = teams.length;
       while(i--) {
-        var datesTaken = [];
         var team = teams[0];
         while(team.games < totalGamesPerTeam) {
-          var day = getAvailableDay(datesTaken);
           var opponent = getAvailableOpponent(team, events);
+          var day = getAvailableDay(team, opponent);
           events.push({
             title: team.city + " vs " + opponent.city,
             start: day,
@@ -134,41 +137,46 @@ $(document).ready(function() {
             teams.splice(0, 1);
           }
           opponent.games++;
-          datesTaken.push(formatDate(day));
+          team.dates.push(formatDate(day));
+          opponent.dates.push(formatDate(day));
         }
       };
       $("#calendar").fullCalendar('addEventSource', events);
     }
 
-    function getAvailableDay(datesTaken) {
+    function getAvailableDay(currentTeam, opponent) {
       var date = moment($.extend( true, {}, startDate ));
       var randomDay = Math.floor(Math.random() * totalDays);
       date.add(randomDay, 'days')
       // check if the random date selected is already taken
-      if ($.inArray(formatDate(date), datesTaken) !== -1) {
-        return getAvailableDay(datesTaken);
+      if ($.inArray(formatDate(date), currentTeam.dates) !== -1 || $.inArray(formatDate(date), opponent.dates) !== -1) {
+        return getAvailableDay(currentTeam, opponent);
       }
       return date;
     }
 
-    function getAvailableOpponent(currentTeam, events) {
-      var randomTeam = Math.floor(Math.random() * teams.length);
-      if (teams[randomTeam].city == currentTeam.city) { // same team, try again
-        return getAvailableOpponent(currentTeam, events);
-      } else if (teams[randomTeam].games >= totalGamesPerTeam) { // random team has hit their max games, try again
-        return getAvailableOpponent(currentTeam, events);
+    function getAvailableOpponent(currentTeam, events, availableTeams) {
+      var belowMaxGamesTeams = availableTeams || $.merge([], teams);
+      belowMaxGamesTeams.sort(sortTeamsByGames);
+      if (belowMaxGamesTeams[0].city == currentTeam.city) { // same team, try again but remove first
+        belowMaxGamesTeams.splice(0, 1);
+        return getAvailableOpponent(currentTeam, events, belowMaxGamesTeams);
+      } else if (belowMaxGamesTeams[0].games >= totalGamesPerTeam) { // random team has hit their max games, try again
+        belowMaxGamesTeams.splice(0, 1);
+        return getAvailableOpponent(currentTeam, events, belowMaxGamesTeams);
       } else {
         // grabs all games scheduled between the current team and potential opponent
         var gamesPlayed = $.grep(events, function(game) {
-          return (game.away == teams[randomTeam].city && game.home == currentTeam.city) ||
-            (game.away == currentTeam.city && game.home == teams[randomTeam].city);
+          return (game.away == belowMaxGamesTeams[0].city && game.home == currentTeam.city) ||
+            (game.away == currentTeam.city && game.home == belowMaxGamesTeams[0].city);
         });
         // check to see if the team has already played the max against this team
         if (gamesPlayed.length >= gamesToPlay) {
-          return getAvailableOpponent(currentTeam, events);
+          belowMaxGamesTeams.splice(0, 1);
+          return getAvailableOpponent(currentTeam, events, belowMaxGamesTeams);
         }
       }
-      return teams[randomTeam];
+      return belowMaxGamesTeams[0];
     }
 
     function maxScheduledDays() {
@@ -205,5 +213,12 @@ $(document).ready(function() {
       var secondCity = secondObject.city
       return ((firstCity < secondCity) ? -1 : ((firstCity > secondCity) ? 1 : 0));
     }
+
+    function sortTeamsByGames(firstObject, secondObject) {
+      var firstCity = firstObject.games;
+      var secondCity = secondObject.games
+      return ((firstCity < secondCity) ? -1 : ((firstCity > secondCity) ? 1 : 0));
+    }
+
 
 });

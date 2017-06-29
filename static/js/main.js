@@ -156,6 +156,7 @@ $(document).ready(function() {
       $("#calendar").fullCalendar('addEventSource', events);
     }
 
+    // TODO: Refactor, make more concise, easier to decipher
     function getHomeTeam(team, opponent) {
       var totalHomeGames = 0;
       // get all games against this opponent, whilst tallying the homegames they've played total
@@ -181,7 +182,7 @@ $(document).ready(function() {
         }
       } else { //uneven number, makes life harder
         // can we slot a home game? home games are less than total played so far
-        if ((locations.length / 2) >= homeGames && (locations.length == 0 || (team.games / 2) >= totalHomeGames)) {
+        if ((locations.length / 2) >= homeGames && ((team.games / 2) >= totalHomeGames)) {
           return team;
         } else {
           return opponent;

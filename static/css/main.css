@@ -32,6 +32,10 @@ body {
   padding: 5px;
 }
 
+#teamsList > li {
+  color: white;
+}
+
 .params-min {
   height:358px;
   overflow: scroll;

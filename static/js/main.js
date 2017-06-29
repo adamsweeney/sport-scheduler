@@ -14,15 +14,23 @@ $(document).ready(function() {
     var gamesToPlay;
 
     class Team {
-      constructor(city, color, games, dates) {
+      constructor(city, color, games, dates, locations) {
         this.city = city;
         this.color = color;
         this.games = games;
         this.dates = dates;
+        this.locations = locations;
       }
 
       toString(){
         return this.city;
+      }
+    }
+
+    class Location {
+      constructor(opponent, isHome) {
+        this.opponent = opponent;
+        this.isHome = isHome;
       }
     }
 
@@ -100,7 +108,7 @@ $(document).ready(function() {
           for (var i = 1; i <= numberOfTeams; i++) {
             var city = chance.city();
             var color = chance.color({format: 'hex'});
-            teams.push(new Team(city, color, 0, []));
+            teams.push(new Team(city, color, 0, [], []));
           }
           teams.sort(sortTeams);
           teams.forEach(function(element) {
@@ -125,12 +133,14 @@ $(document).ready(function() {
         while(team.games < totalGamesPerTeam) {
           var opponent = getAvailableOpponent(team, events);
           var day = getAvailableDay(team, opponent);
+          var homeTeam = getHomeTeam(team, opponent);
+          var awayTeam = homeTeam.city == team.city ? opponent : team;
           events.push({
-            title: team.city + " vs " + opponent.city,
+            title: homeTeam.city + " vs " + awayTeam.city,
             start: day,
-            color: team.color,
-            home: team.city,
-            away: opponent.city
+            color: homeTeam.color,
+            home: homeTeam.city,
+            away: awayTeam.city
           });
           team.games++;
           if (team.games >= totalGamesPerTeam) {
@@ -139,9 +149,46 @@ $(document).ready(function() {
           opponent.games++;
           team.dates.push(formatDate(day));
           opponent.dates.push(formatDate(day));
+          homeTeam.locations.push(new Location(awayTeam, true));
+          awayTeam.locations.push(new Location(homeTeam, false));
         }
       };
       $("#calendar").fullCalendar('addEventSource', events);
+    }
+
+    function getHomeTeam(team, opponent) {
+      var totalHomeGames = 0;
+      // get all games against this opponent, whilst tallying the homegames they've played total
+      var locations = $.grep(team.locations, function(location) {
+        if (location.isHome) {
+          totalHomeGames++;
+        }
+        return location.opponent.city === opponent.city;
+      });
+
+      // within all those games vs the opponent, get how many of those were home
+      var homeGames = 0;
+      locations.forEach(function(location) {
+        if (location.isHome) {
+          homeGames++;
+        }
+      });
+      if (!gamesToPlay % 2) { // even number of games between each team
+        if ((gamesToPlay / 2) == homeGames) {
+          return opponent;
+        } else {
+          return team;
+        }
+      } else { //uneven number, makes life harder
+        // can we slot a home game? home games are less than total played so far
+        if ((locations.length / 2) >= homeGames && (locations.length == 0 || (team.games / 2) >= totalHomeGames)) {
+          return team;
+        } else {
+          return opponent;
+        }
+      }
+
+
     }
 
     function getAvailableDay(currentTeam, opponent) {

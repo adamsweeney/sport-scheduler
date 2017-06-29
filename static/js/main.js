@@ -15,6 +15,7 @@ $(document).ready(function() {
 
     class Team {
       constructor(city, color, games, dates, locations) {
+        this.id = this.genGuid();
         this.city = city;
         this.color = color;
         this.games = games;
@@ -24,6 +25,13 @@ $(document).ready(function() {
 
       toString(){
         return this.city;
+      }
+
+      genGuid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
       }
     }
 
@@ -134,13 +142,13 @@ $(document).ready(function() {
           var opponent = getAvailableOpponent(team, events);
           var day = getAvailableDay(team, opponent);
           var homeTeam = getHomeTeam(team, opponent);
-          var awayTeam = homeTeam.city == team.city ? opponent : team;
+          var awayTeam = homeTeam.id == team.id ? opponent : team;
           events.push({
             title: homeTeam.city + " vs " + awayTeam.city,
             start: day,
             color: homeTeam.color,
-            home: homeTeam.city,
-            away: awayTeam.city
+            home: homeTeam.id,
+            away: awayTeam.id
           });
           team.games++;
           if (team.games >= totalGamesPerTeam) {
@@ -164,7 +172,7 @@ $(document).ready(function() {
         if (location.isHome) {
           totalHomeGames++;
         }
-        return location.opponent.city === opponent.city;
+        return location.opponent.id === opponent.id;
       });
 
       // within all those games vs the opponent, get how many of those were home
@@ -206,7 +214,7 @@ $(document).ready(function() {
     function getAvailableOpponent(currentTeam, events, availableTeams) {
       var belowMaxGamesTeams = availableTeams || $.merge([], teams);
       belowMaxGamesTeams.sort(sortTeamsByGames);
-      if (belowMaxGamesTeams[0].city == currentTeam.city) { // same team, try again but remove first
+      if (belowMaxGamesTeams[0].id == currentTeam.id) { // same team, try again but remove first
         belowMaxGamesTeams.splice(0, 1);
         return getAvailableOpponent(currentTeam, events, belowMaxGamesTeams);
       } else if (belowMaxGamesTeams[0].games >= totalGamesPerTeam) { // random team has hit their max games, try again
@@ -215,8 +223,8 @@ $(document).ready(function() {
       } else {
         // grabs all games scheduled between the current team and potential opponent
         var gamesPlayed = $.grep(events, function(game) {
-          return (game.away == belowMaxGamesTeams[0].city && game.home == currentTeam.city) ||
-            (game.away == currentTeam.city && game.home == belowMaxGamesTeams[0].city);
+          return (game.away == belowMaxGamesTeams[0].id && game.home == currentTeam.id) ||
+            (game.away == currentTeam.id && game.home == belowMaxGamesTeams[0].id);
         });
         // check to see if the team has already played the max against this team
         if (gamesPlayed.length >= gamesToPlay) {
@@ -267,6 +275,7 @@ $(document).ready(function() {
       var secondCity = secondObject.games
       return ((firstCity < secondCity) ? -1 : ((firstCity > secondCity) ? 1 : 0));
     }
+
 
 
 });

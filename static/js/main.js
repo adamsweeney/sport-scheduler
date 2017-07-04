@@ -8,6 +8,7 @@ $(document).ready(function() {
     var startDate = moment($("#seasonStartPicker").val());
     var endDate = moment($("#seasonEndPicker").val());
     var checkedBackToBack = true;
+    var backToBacks = 0;
     var totalGamesPerTeam;
     var totalDays;
     var numberOfTeams;
@@ -157,8 +158,8 @@ $(document).ready(function() {
           opponent.games++;
           team.dates.push(formatDate(day));
           opponent.dates.push(formatDate(day));
-          homeTeam.locations.push(new Location(awayTeam, true));
-          awayTeam.locations.push(new Location(homeTeam, false));
+          homeTeam.locations.push(new Location(awayTeam.id, true));
+          awayTeam.locations.push(new Location(homeTeam.id, false));
         }
       };
       $("#calendar").fullCalendar('addEventSource', events);
@@ -172,7 +173,7 @@ $(document).ready(function() {
         if (location.isHome) {
           totalHomeGames++;
         }
-        return location.opponent.id === opponent.id;
+        return location.opponent === opponent.id;
       });
 
       // within all those games vs the opponent, get how many of those were home
@@ -208,7 +209,39 @@ $(document).ready(function() {
       if ($.inArray(formatDate(date), currentTeam.dates) !== -1 || $.inArray(formatDate(date), opponent.dates) !== -1) {
         return getAvailableDay(currentTeam, opponent);
       }
+      if (checkedBackToBack) {
+        var potentialDate = formatDate(date);
+        if (canSlotWithBackToBack(currentTeam, potentialDate) && canSlotWithBackToBack(opponent, potentialDate)) {
+          return date;
+        } else {
+          return getAvailableDay(currentTeam, opponent);
+        }
+      }
       return date;
+    }
+
+    function canSlotWithBackToBack(team, potentialDate) {
+      var beforeGames = gamesConsecutively(team, potentialDate, true);
+      var afterGames = gamesConsecutively(team, potentialDate, false);
+      if ((beforeGames + afterGames) < backToBacks) {
+        return true;
+      }
+      return false;
+    }
+
+    function gamesConsecutively(team, date, isBefore) {
+      var gamesConsecutive = 0;
+      var momentDate = moment(date);
+      for (var i = 1; i <= backToBacks; i++) {
+        if (isBefore && $.inArray(formatDate(momentDate.subtract(1, 'days')), team.dates) !== -1) {
+          gamesConsecutive++;
+        } else if (!isBefore && $.inArray(formatDate(momentDate.add(1, 'days')), team.dates) !== -1) {
+          gamesConsecutive++;
+        } else {
+          break;
+        }
+      }
+      return gamesConsecutive;
     }
 
     function getAvailableOpponent(currentTeam, events, availableTeams) {
@@ -239,7 +272,7 @@ $(document).ready(function() {
       var maxDaysInSchedule = 0;
       if (startDate != null && endDate != null && endDate > startDate) {
         var totalDays = endDate.diff(startDate, 'days')+1;
-        var backToBacks = backToBackGames();
+        backToBacks = backToBackGames();
         if (backToBacks == 0) {
           maxDaysInSchedule = totalDays / 2;
         } else {
